@@ -1,20 +1,28 @@
 (function () {
-    const tasks = Array.isArray(window.NEXUS_TASKS) ? window.NEXUS_TASKS : [];
+    const dateInput = document.getElementById('date');
+    const topbar = document.querySelector('.topbar');
+    if (!dateInput || !topbar) return;
+
+    const controls = document.createElement('div');
+    controls.className = 'topbar-actions';
+    controls.innerHTML = '<button id="enable-alarms" class="btn btn-light" type="button">Enable alarms</button><span id="alarm-status" class="alarm-status">Alarms are off</span>';
+    topbar.appendChild(controls);
+
+    const toast = document.createElement('div');
+    toast.id = 'alarm-toast';
+    toast.className = 'alarm-toast';
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
+    document.body.appendChild(toast);
+
     const enableButton = document.getElementById('enable-alarms');
     const alarmStatus = document.getElementById('alarm-status');
-    const toast = document.getElementById('alarm-toast');
     const alertedTasks = new Set();
+    let tasks = [];
     let audioContext = null;
     let alarmsEnabled = false;
 
-    function setStatus(message, active) {
-        if (!alarmStatus) return;
-        alarmStatus.textContent = message;
-        alarmStatus.classList.toggle('active', active);
-    }
-
     function showToast(message) {
-        if (!toast) return;
         toast.textContent = message;
         toast.classList.add('visible');
         window.setTimeout(() => toast.classList.remove('visible'), 8000);
@@ -38,27 +46,30 @@
         });
     }
 
-    function currentDateAndTime() {
-        const now = new Date();
-        const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
-        const time = [String(now.getHours()).padStart(2, '0'), String(now.getMinutes()).padStart(2, '0')].join(':');
-        return { date, time };
+    async function loadTasks() {
+        try {
+            const response = await fetch('api/tasks.php?date=' + encodeURIComponent(dateInput.value), { cache: 'no-store' });
+            const payload = await response.json();
+            tasks = Array.isArray(payload.tasks) ? payload.tasks : [];
+        } catch (error) {
+            tasks = [];
+        }
     }
 
     function checkAlarms() {
         if (!alarmsEnabled) return;
-        const current = currentDateAndTime();
+        const now = new Date();
+        const date = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, '0'), String(now.getDate()).padStart(2, '0')].join('-');
+        const time = [String(now.getHours()).padStart(2, '0'), String(now.getMinutes()).padStart(2, '0')].join(':');
         tasks.forEach((task) => {
-            if (task.status === 'done' || !task.start_time || task.task_date !== current.date || task.start_time !== current.time) return;
+            if (task.status === 'done' || !task.start_time || task.task_date !== date || task.start_time.slice(0, 5) !== time) return;
             const key = String(task.id) + ':' + task.task_date + ':' + task.start_time;
             if (alertedTasks.has(key)) return;
             alertedTasks.add(key);
             playAlarm();
             if (navigator.vibrate) navigator.vibrate([220, 100, 220]);
             showToast('⏰ ' + task.title + ' is scheduled now.');
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification('NEXUS reminder', { body: task.title });
-            }
+            if ('Notification' in window && Notification.permission === 'granted') new Notification('NEXUS reminder', { body: task.title });
         });
     }
 
@@ -68,16 +79,18 @@
             audioContext = audioContext || new AudioContextClass();
             await audioContext.resume();
         }
-        if ('Notification' in window && Notification.permission === 'default') {
-            await Notification.requestPermission();
-        }
+        if ('Notification' in window && Notification.permission === 'default') await Notification.requestPermission();
         alarmsEnabled = true;
-        setStatus('Alarms enabled', true);
-        if (enableButton) enableButton.textContent = 'Alarms enabled';
+        alarmStatus.textContent = 'Alarms enabled';
+        alarmStatus.classList.add('active');
+        enableButton.textContent = 'Alarms enabled';
         showToast('Alarms are ready while this planner page stays open.');
+        await loadTasks();
         checkAlarms();
     }
 
-    if (enableButton) enableButton.addEventListener('click', enableAlarms);
+    enableButton.addEventListener('click', enableAlarms);
+    loadTasks();
+    window.setInterval(loadTasks, 60000);
     window.setInterval(checkAlarms, 15000);
 })();
