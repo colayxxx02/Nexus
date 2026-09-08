@@ -19,7 +19,6 @@
       "label": "NEXUS MariaDB"
     }
   },
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends mariadb-client",
   "customizations": {
     "vscode": {
       "extensions": [
