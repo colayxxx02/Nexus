@@ -1,11 +1,22 @@
 {
-  "name": "NEXUS PHP",
-  "image": "mcr.microsoft.com/devcontainers/php:1-8.3-bookworm",
-  "forwardPorts": [8000],
+  "name": "NEXUS PHP + MariaDB",
+  "dockerComposeFile": [
+    "../docker-compose.yml"
+  ],
+  "service": "app",
+  "workspaceFolder": "/workspaces/Nexus",
+  "runServices": [
+    "db"
+  ],
+  "shutdownAction": "stopCompose",
+  "forwardPorts": [8000, 3306],
   "portsAttributes": {
     "8000": {
       "label": "NEXUS PHP website",
       "onAutoForward": "openBrowser"
+    },
+    "3306": {
+      "label": "NEXUS MariaDB"
     }
   },
   "customizations": {
