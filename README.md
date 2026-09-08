@@ -1,6 +1,16 @@
 # NEXUS
 
-A PHP website starter designed for GitHub Codespaces and iPad-friendly development.
+A PHP and MariaDB daily planner designed for GitHub Codespaces and iPad-friendly development.
+
+## Current MVP: Daily Planner
+
+NEXUS is currently a simple single-user task and activity organizer. It lets you:
+
+- Add tasks with a title, date, time, priority, category, and notes
+- View tasks for today or any selected date
+- Mark tasks as done or pending
+- Delete tasks
+- See pending and completed counts for the selected date
 
 ## Stack
 
@@ -12,19 +22,13 @@ A PHP website starter designed for GitHub Codespaces and iPad-friendly developme
 
 ## Start in GitHub Codespaces
 
-1. Pull the latest changes from main.
-2. Rebuild the Codespace container so the MariaDB service is created:
+The Codespaces configuration starts the PHP server automatically after the container is running. Open forwarded port 8000 to view NEXUS.
 
-   Codespaces menu -> Rebuild Container
-
-3. Wait for the app and db services to become ready.
-4. Start the PHP website:
+If you need to start it manually:
 
     php -S 0.0.0.0:8000 -t public
 
-5. Open the forwarded port 8000.
-
-The MariaDB database is created automatically by Docker Compose using the development settings in docker-compose.yml. The PHP app connects to the database service using the hostname db.
+The MariaDB database is created automatically by Docker Compose. The app connects to the database service using the hostname db.
 
 ## MariaDB terminal login
 
@@ -40,23 +44,20 @@ These are local development credentials only. Do not use them in production.
 
 ## Project layout
 
-- public/index.php — main web page and database status
+- public/index.php — daily planner interface and task actions
 - public/health.php — JSON health endpoint
 - src/bootstrap.php — PDO MySQL connection and schema initialization
-- database/schema.sql — MariaDB schema
+- database/schema.sql — MariaDB schema and tasks table
 - docker-compose.yml — PHP app and MariaDB services
 - .devcontainer/ — GitHub Codespaces configuration
 
-## Adding tables
+## Next client-request options
 
-Add CREATE TABLE statements to database/schema.sql. The schema is applied automatically when the PHP app connects. Use PHP prepared statements for INSERT, SELECT, UPDATE, and DELETE operations.
-
-## Next development steps
-
-1. Decide the first real module, such as users, inventory, appointments, or records.
-2. Add its tables to database/schema.sql.
-3. Add PHP pages under public/ and reusable logic under src/.
-4. Keep real credentials out of Git.
+1. Add user login and accounts.
+2. Add task editing.
+3. Add weekly calendar view.
+4. Add recurring tasks and reminders.
+5. Add reports and productivity summaries.
 
 ## Security note
 
