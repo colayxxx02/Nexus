@@ -19,6 +19,7 @@
       "label": "NEXUS MariaDB"
     }
   },
+  "postStartCommand": "pkill -f 'php -S 0.0.0.0:8000 -t public' || true; nohup php -S 0.0.0.0:8000 -t public >/tmp/nexus-php.log 2>&1 &",
   "customizations": {
     "vscode": {
       "extensions": [
