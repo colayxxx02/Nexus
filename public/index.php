@@ -233,5 +233,6 @@ $displayDateLabel = $displayDate instanceof DateTimeImmutable ? $displayDate->fo
             </section>
         </section>
     </main>
+    <script src="assets/app.js" defer></script>
 </body>
 </html>
