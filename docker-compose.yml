@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile
+    image: mcr.microsoft.com/devcontainers/php:1-8.3-bookworm
     volumes:
       - .:/workspaces/Nexus:cached
     working_dir: /workspaces/Nexus
