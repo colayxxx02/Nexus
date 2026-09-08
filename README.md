@@ -62,3 +62,8 @@ These are local development credentials only. Do not use them in production.
 ## Security note
 
 This is a development foundation. Before production, add authentication, authorization, CSRF protection, validation, HTTPS, backups, and production-grade secrets.
+
+
+## Planner alarms
+
+Click **Enable alarms** before using reminders. The browser checks scheduled tasks every 15 seconds and can play a sound, vibrate where supported, and show a notification. The planner page must stay open for browser alarms to work; background reminders when the page is closed will need a server scheduler and notification service.
