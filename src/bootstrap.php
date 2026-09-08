@@ -10,17 +10,36 @@ function nexusDatabase(): PDO
         return $pdo;
     }
 
-    $databasePath = getenv('NEXUS_DB_PATH') ?: dirname(__DIR__) . '/data/nexus.sqlite';
-    $databaseDirectory = dirname($databasePath);
+    $host = getenv('NEXUS_DB_HOST') ?: 'db';
+    $port = getenv('NEXUS_DB_PORT') ?: '3306';
+    $database = getenv('NEXUS_DB_NAME') ?: 'nexus';
+    $username = getenv('NEXUS_DB_USER') ?: 'nexus_app';
+    $password = getenv('NEXUS_DB_PASSWORD') ?: 'nexus_dev_password';
+    $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $database);
 
-    if (!is_dir($databaseDirectory)) {
-        mkdir($databaseDirectory, 0775, true);
+    $lastException = null;
+
+    for ($attempt = 1; $attempt <= 15; $attempt++) {
+        try {
+            $pdo = new PDO($dsn, $username, $password, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+            break;
+        } catch (PDOException $exception) {
+            $lastException = $exception;
+            sleep(1);
+        }
     }
 
-    $pdo = new PDO('sqlite:' . $databasePath, null, null, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-    ]);
+    if (!$pdo instanceof PDO) {
+        throw new RuntimeException(
+            'Unable to connect to MariaDB: ' . ($lastException?->getMessage() ?? 'unknown error'),
+            0,
+            $lastException
+        );
+    }
 
     $schemaPath = dirname(__DIR__) . '/database/schema.sql';
     $schema = file_get_contents($schemaPath);
