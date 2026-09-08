@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - .:/workspaces/Nexus:cached
+    working_dir: /workspaces/Nexus
+    command: sleep infinity
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NEXUS_DB_DRIVER: ${NEXUS_DB_DRIVER:-mysql}
+      NEXUS_DB_HOST: ${NEXUS_DB_HOST:-db}
+      NEXUS_DB_PORT: ${NEXUS_DB_PORT:-3306}
+      NEXUS_DB_NAME: ${NEXUS_DB_NAME:-nexus}
+      NEXUS_DB_USER: ${NEXUS_DB_USER:-nexus_app}
+      NEXUS_DB_PASSWORD: ${NEXUS_DB_PASSWORD:-nexus_dev_password}
+
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE:-nexus}
+      MARIADB_USER: ${MARIADB_USER:-nexus_app}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:-nexus_dev_password}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:-root_dev_password}
+    volumes:
+      - mariadb-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  mariadb-data:
