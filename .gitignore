@@ -1,0 +1,17 @@
+# Local environment
+.env
+
+# SQLite database files
+data/*.sqlite
+data/*.sqlite-*
+data/*.db
+
+# PHP and editor artifacts
+/vendor/
+.phpunit.result.cache
+.DS_Store
+.vscode/
+.idea/
+
+# Local logs
+*.log
